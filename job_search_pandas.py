@@ -1,6 +1,5 @@
 import requests
 import json
-import os
 import os.path
 import csv
 
@@ -36,4 +35,5 @@ def create_csv(filename):
 
     print(f'CSV file created at {csv_file_path}')
 
-create_csv("python_jobs")
+# create_csv("python_jobs")
+    
