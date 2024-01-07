@@ -2,6 +2,8 @@ import requests
 import json
 import os.path
 import csv
+import pandas as pd
+from datetime import datetime
 
 # Function makes call to API and returns the results in a dict
 def search_jobs(keywords, locationName, distance_in_miles):
@@ -20,11 +22,12 @@ def search_jobs(keywords, locationName, distance_in_miles):
     return json_data['results']
 
 
-results = search_jobs("python", "London", 10)
-column_names = list(results[0].keys())
-
 # Function to write search results to csv
 def create_csv(filename):
+
+    results = search_jobs("python", "London", 10)
+    column_names = list(results[0].keys())
+    
     csv_file_path = f'csv_files/{filename}.csv'
 
     with open(csv_file_path, 'w', newline='') as csv_file:
@@ -36,4 +39,28 @@ def create_csv(filename):
     print(f'CSV file created at {csv_file_path}')
 
 # create_csv("python_jobs")
-    
+
+def update_csv(filename):
+
+    csv_file_path = f'csv_files/{filename}.csv'
+    df = pd.read_csv(csv_file_path)
+    df['date'] = pd.to_datetime(df['date'], format='%d/%m/%Y')
+    last_date = df['date'].max()
+
+    results = search_jobs("python", "London", 10)
+
+    count = 0
+    for result in results:
+        dt_date = datetime.strptime(result['date'], "%d/%m/%Y")
+        if dt_date > last_date:
+            with open(csv_file_path, 'a', newline='') as csv_file:
+                csv_writer = csv.writer(csv_file)
+                csv_writer.writerow(result.values())
+            count += 1
+
+    if count > 0:
+        print(f"{count} New results added to {csv_file_path}.")
+    else:
+        print("No new jobs since last update")
+
+update_csv("python_jobs")
